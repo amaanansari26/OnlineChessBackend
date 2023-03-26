@@ -65,7 +65,6 @@ class Game {
 
   getAvailableMoves(position) {
     const row = Number(position.split('-')[0]);
-
     const pos = Number(position.split('-')[1]) - 1;
     const selectedPiece = this.board[row][pos];
     const raceOfPiece = selectedPiece.split('-')[0];
@@ -75,6 +74,41 @@ class Game {
     let pointer = this.board[row][pos];
     let prow = row;
     let ppos = pos;
+    const combineMoves = (pclass) => {
+      const directionsByClass = {
+        rook: [[1, 0], [-1, 0], [0, 1], [0, -1]],
+        bishop: [[1, 1], [-1, -1], [1, -1], [-1, 1]],
+        queen: [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]],
+      };
+      directionsByClass[pclass].forEach((direction) => {
+        pointer = this.board[row][pos];
+        prow = row;
+        ppos = pos;
+
+        while (pointer !== undefined) {
+          prow += direction[0];
+          ppos += direction[1];
+          if (prow > 8 || prow < 1 || ppos > 7 || ppos < 0) {
+            pointer = undefined;
+          } else {
+            pointer = this.board[prow][ppos];
+          }
+          if (pointer === 0) availableMoves.push(`${prow}-${ppos + 1}`);
+          if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'w' && pointer.split('-')[0] === 'b') {
+            availableMoves.push(`${prow}-${ppos + 1}`);
+            availableKillMoves.push(`${prow}-${ppos + 1}`);
+            pointer = undefined;
+          }
+          if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'b' && pointer.split('-')[0] === 'w') {
+            availableMoves.push(`${prow}-${ppos + 1}`);
+            availableKillMoves.push(`${prow}-${ppos + 1}`);
+            pointer = undefined;
+          }
+          if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'w' && pointer.split('-')[0] === 'w') pointer = undefined;
+          if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'b' && pointer.split('-')[0] === 'b') pointer = undefined;
+        }
+      });
+    };
     switch (classOfPiece) {
       case 'pawn':
         if (raceOfPiece === 'w' && this.board[row + 1][pos] === 0) availableMoves.push(`${row + 1}-${pos + 1}`);
@@ -98,66 +132,13 @@ class Game {
         break;
 
       case 'rook':
-        [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach((direction) => {
-          pointer = this.board[row][pos];
-          prow = row;
-          ppos = pos;
-
-          while (pointer !== undefined) {
-            prow += direction[0];
-            ppos += direction[1];
-            if (prow > 8 || prow < 1 || ppos > 7 || ppos < 0) {
-              pointer = undefined;
-            } else {
-              pointer = this.board[prow][ppos];
-            }
-            if (pointer === 0) availableMoves.push(`${prow}-${ppos + 1}`);
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'w' && pointer.split('-')[0] === 'b') {
-              availableMoves.push(`${prow}-${ppos + 1}`);
-              availableKillMoves.push(`${prow}-${ppos + 1}`);
-              pointer = undefined;
-            }
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'b' && pointer.split('-')[0] === 'w') {
-              availableMoves.push(`${prow}-${ppos + 1}`);
-              availableKillMoves.push(`${prow}-${ppos + 1}`);
-              pointer = undefined;
-            }
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'w' && pointer.split('-')[0] === 'w') pointer = undefined;
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'b' && pointer.split('-')[0] === 'b') pointer = undefined;
-          }
-        });
-
+        combineMoves('rook');
         break;
       case 'bishop':
-        [[1, 1], [-1, -1], [1, -1], [-1, 1]].forEach((direction) => {
-          pointer = this.board[row][pos];
-          prow = row;
-          ppos = pos;
-
-          while (pointer !== undefined) {
-            prow += direction[0];
-            ppos += direction[1];
-            if (prow > 8 || prow < 1 || ppos > 7 || ppos < 0) {
-              pointer = undefined;
-            } else {
-              pointer = this.board[prow][ppos];
-            }
-            if (pointer === 0) availableMoves.push(`${prow}-${ppos + 1}`);
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'w' && pointer.split('-')[0] === 'b') {
-              availableMoves.push(`${prow}-${ppos + 1}`);
-              availableKillMoves.push(`${prow}-${ppos + 1}`);
-              pointer = undefined;
-            }
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'b' && pointer.split('-')[0] === 'w') {
-              availableMoves.push(`${prow}-${ppos + 1}`);
-              availableKillMoves.push(`${prow}-${ppos + 1}`);
-              pointer = undefined;
-            }
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'w' && pointer.split('-')[0] === 'w') pointer = undefined;
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'b' && pointer.split('-')[0] === 'b') pointer = undefined;
-          }
-        });
-
+        combineMoves('bishop');
+        break;
+      case 'queen':
+        combineMoves('queen');
         break;
       case 'knight':
         [
@@ -168,7 +149,8 @@ class Game {
           [row + 1, pos - 2],
           [row - 1, pos - 2],
           [row + 1, pos + 2],
-          [row - 1, pos + 2]].forEach(([krow, kpos]) => {
+          [row - 1, pos + 2],
+        ].forEach(([krow, kpos]) => {
           if (krow < 9 && krow > 0 && kpos < 8 && kpos >= 0 && this.board[krow][kpos] === 0) availableMoves.push(`${krow}-${kpos + 1}`);
           if (krow < 9 && krow > 0 && kpos < 8 && kpos >= 0 && this.board[krow][kpos] !== 0 && raceOfPiece === 'w' && this.board[krow][kpos].split('-')[0] === 'b') {
             availableMoves.push(`${krow}-${kpos + 1}`);
@@ -177,46 +159,6 @@ class Game {
           if (krow < 9 && krow > 0 && kpos < 8 && kpos >= 0 && this.board[krow][kpos] !== 0 && raceOfPiece === 'b' && this.board[krow][kpos].split('-')[0] === 'w') {
             availableMoves.push(`${krow}-${kpos + 1}`);
             availableKillMoves.push(`${krow}-${kpos + 1}`);
-          }
-        });
-
-        break;
-      case 'queen':
-        [
-          [1, 1],
-          [-1, -1],
-          [1, -1],
-          [-1, 1],
-          [1, 0],
-          [-1, 0],
-          [0, 1],
-          [0, -1],
-        ].forEach((direction) => {
-          pointer = this.board[row][pos];
-          prow = row;
-          ppos = pos;
-
-          while (pointer !== undefined) {
-            prow += direction[0];
-            ppos += direction[1];
-            if (prow > 8 || prow < 1 || ppos > 7 || ppos < 0) {
-              pointer = undefined;
-            } else {
-              pointer = this.board[prow][ppos];
-            }
-            if (pointer === 0) availableMoves.push(`${prow}-${ppos + 1}`);
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'w' && pointer.split('-')[0] === 'b') {
-              availableMoves.push(`${prow}-${ppos + 1}`);
-              availableKillMoves.push(`${prow}-${ppos + 1}`);
-              pointer = undefined;
-            }
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'b' && pointer.split('-')[0] === 'w') {
-              availableMoves.push(`${prow}-${ppos + 1}`);
-              availableKillMoves.push(`${prow}-${ppos + 1}`);
-              pointer = undefined;
-            }
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'w' && pointer.split('-')[0] === 'w') pointer = undefined;
-            if ((pointer !== 0 && pointer !== undefined) && raceOfPiece === 'b' && pointer.split('-')[0] === 'b') pointer = undefined;
           }
         });
 
