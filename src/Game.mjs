@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 class Game {
   board = {
     8: ['b-rook-1', 'b-knight-1', 'b-bishop-1', 'b-queen', 'b-king', 'b-bishop-2', 'b-knight-2', 'b-rook-2'],
@@ -63,7 +64,7 @@ class Game {
 
   killedPieces = [];
 
-  getAvailableMoves(position) {
+  getAvailableMoves(position, isRecursion = false) {
     const row = Number(position.split('-')[0]);
     const pos = Number(position.split('-')[1]) - 1;
     const selectedPiece = this.board[row][pos];
@@ -71,8 +72,8 @@ class Game {
     const raceOfPiece = selectedPiece.split('-')[0];
     const opRaceOfPiece = raceOfPiece === 'w' ? 'b' : 'w';
     const classOfPiece = selectedPiece.split('-')[1];
-    const availableMoves = [];
-    const availableKillMoves = [];
+    let availableMoves = [];
+    let availableKillMoves = [];
     let pointer = this.board[row][pos];
     let prow = row;
     let ppos = pos;
@@ -172,6 +173,21 @@ class Game {
             availableKillMoves.push(`${krow}-${kpos + 1}`);
           }
         });
+        if (!isRecursion) {
+          const opRaceLocations = [];
+          for (let r = 1; r < 9; r += 1) {
+            for (let p = 0; p < 8; p += 1) {
+              if (this.board[r][p] !== 0 && this.board[r][p].split('-')[0] === opRaceOfPiece) opRaceLocations.push(`${r}-${p + 1}`);
+            }
+          }
+          let opAvailableMoves = [];
+          opRaceLocations.forEach((loc) => {
+            // eslint-disable-next-line max-len
+            opAvailableMoves = opAvailableMoves.concat(this.getAvailableMoves(loc, true).availableMoves);
+          });
+          availableMoves = availableMoves.filter((mov) => !opAvailableMoves.includes(mov));
+          availableKillMoves = availableKillMoves.filter((mov) => !opAvailableMoves.includes(mov));
+        }
 
         break;
       default:
@@ -189,5 +205,5 @@ class Game {
 export default Game;
 
 const myGame = new Game({ playerOneName: 'Amaan', playerTwoName: 'Hadiya' });
-console.log(myGame.getAvailableMoves('4-3'));
+console.log(myGame.getAvailableMoves('5-4'));
 console.log('done');
