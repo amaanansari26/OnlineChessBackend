@@ -196,6 +196,32 @@ class Game {
     return { availableMoves, availableKillMoves };
   }
 
+  movePiece(race, from, to) {
+    if (race !== this.chance) return false;
+    const frow = Number(from.split('-')[0]);
+    const fpos = Number(from.split('-')[1]) - 1;
+    const trow = Number(to.split('-')[0]);
+    const tpos = Number(to.split('-')[1]) - 1;
+    const killedPiece = this.board[trow][tpos];
+    const availabeMovesOfPiece = this.getAvailableMoves(from);
+    if (!availabeMovesOfPiece) return false;
+    if (race[0] !== this.board[frow][fpos].split('-')[0]) return false;
+    if (availabeMovesOfPiece.availableMoves.includes(to)) {
+      this.moves.push({
+        time: Date.now(),
+        chanceRace: this.chance,
+        from,
+        to,
+        piece: this.board[frow][fpos],
+        killedPiece: killedPiece === 0 ? '' : killedPiece,
+      });
+      this.board[trow][tpos] = this.board[frow][fpos];
+      this.board[frow][fpos] = 0;
+      this.chance = this.chance === 'white' ? 'black' : 'white';
+    }
+    return true;
+  }
+
   constructor({ playerOneName, playerTwoName }) {
     this.players.white.name = playerOneName;
     this.players.black.name = playerTwoName;
@@ -205,5 +231,7 @@ class Game {
 export default Game;
 
 const myGame = new Game({ playerOneName: 'Amaan', playerTwoName: 'Hadiya' });
-console.log(myGame.getAvailableMoves('5-4'));
+console.log(myGame.movePiece('white', '1-2', '3-1'));
+console.log(myGame.board);
+console.log(myGame.chance);
 console.log('done');
