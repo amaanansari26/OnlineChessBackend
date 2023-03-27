@@ -4,7 +4,7 @@ class Game {
     8: ['b-rook-1', 'b-knight-1', 'b-bishop-1', 'b-queen', 'b-king', 'b-bishop-2', 'b-knight-2', 'b-rook-2'],
     7: ['b-pawn-1', 'b-pawn-2', 'b-pawn-3', 'b-pawn-4', 'b-pawn-5', 'b-pawn-6', 'b-pawn-7', 'b-pawn-8'],
     6: [0, 0, 0, 0, 0, 0, 0, 0],
-    5: [0, 0, 0, 'w-king', 0, 0, 0, 0],
+    5: [0, 0, 0, 0, 0, 0, 0, 0],
     4: [0, 0, 0, 0, 0, 0, 0, 0],
     3: [0, 0, 0, 0, 0, 0, 0, 0],
     2: ['w-pawn-1', 'w-pawn-2', 'w-pawn-3', 'w-pawn-4', 'w-pawn-5', 'w-pawn-6', 'w-pawn-7', 'w-pawn-8'],
